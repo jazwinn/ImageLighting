@@ -1,0 +1,86 @@
+# Relighting Studio — pinned to the versions this build was developed and
+# verified against (Windows 11, Python 3.10, RTX 3070, CUDA 13.2).
+#
+#   pip install -r requirements.txt
+#
+# See README.md for the CUDA vs CPU torch install and the optional extras.
+
+# --- GUI -------------------------------------------------------------------
+# PyQt6>=6.6 works too; core/qt_compat.py picks whichever is installed and
+# IMAGELIGHTING_QT=PyQt6 forces the choice.
+PySide6==6.9.3
+
+# --- Rendering -------------------------------------------------------------
+moderngl==5.12.0
+glcontext==2.3.7        # moderngl's context backend; pulled in automatically
+
+# --- Imaging ---------------------------------------------------------------
+numpy==2.1.2
+opencv-python==4.13.0.88
+Pillow==11.3.0
+
+# --- AI inference ----------------------------------------------------------
+# Install torch FIRST from the correct index for your platform, otherwise pip
+# resolves the CPU-only wheel:
+#   CUDA 12.x : pip install torch --index-url https://download.pytorch.org/whl/cu124
+#   CPU only  : pip install torch --index-url https://download.pytorch.org/whl/cpu
+torch==2.12.0
+torchvision==0.27.0     # required by ultralytics
+
+# Primary depth backend: YOLO26 metric depth (yolo26m-depth.pt, ~45 MB,
+# downloaded on first run into models/).
+#
+# LICENCE: Ultralytics is AGPL-3.0. That is fine for personal, research and
+# other open-source use, but distributing this app or offering it over a
+# network obliges you to release your source under AGPL — or to buy an
+# Ultralytics Enterprise licence. If neither suits, drop this dependency and
+# the app falls back to Depth Anything V2 (Apache-2.0) automatically.
+ultralytics==8.4.120
+
+# Fallback depth backend, and still used if ultralytics is absent.
+transformers==5.10.2
+safetensors==0.7.0
+huggingface-hub==1.18.0
+
+# Only needed if you point IMAGELIGHTING_NORMAL_ONNX or
+# IMAGELIGHTING_ALBEDO_ONNX at an exported model. Use onnxruntime-gpu for
+# CUDA execution.
+onnxruntime==1.23.2
+
+# --- Recommended: neural surface normals -----------------------------------
+# StableNormal predicts normals straight from RGB instead of differentiating
+# depth. It is the single biggest quality win in the pipeline: object
+# boundaries stay sharp, and thin structures (chair legs, cables, window
+# bars) appear at all — a depth map cannot resolve them, so no depth-derived
+# method can recover them.
+#
+# Measured on a 1504px interior against the tuned analytic estimator:
+#   halo  0.600 -> 0.250  (-58%)
+#   noise 0.00718 -> 0.00585  (-19%)
+#   cost  0.9 s -> 3.6 s per import, ~4.8 GB peak VRAM
+#
+# LICENCE: Apache-2.0 on both code and weights — no restriction, unlike the
+# depth and albedo backends. Enabled automatically when diffusers is present;
+# disable with --no-neural-normals.
+#
+# Weights (~2 GB) download on first use into models/stablenormal/.
+diffusers==0.39.0
+
+# --- Optional: neural intrinsic decomposition ------------------------------
+# compphoto/Intrinsic gives a far better albedo than the built-in analytic
+# solver — it flattens shading almost completely and removes most of a hard
+# cast shadow. Not installed by default; the app detects it at runtime and
+# falls back to the analytic solver when absent.
+#
+#   pip install "intrinsic @ git+https://github.com/compphoto/Intrinsic@main"
+#
+# LICENCE — read before shipping: released for ACADEMIC USE ONLY, and the
+# method is patent-protected (commercial licensing via the SFU Technology
+# Licensing Office). Unlike AGPL there is no compliance path for commercial
+# use short of negotiating a licence. It is left out of this file
+# deliberately so that `pip install -r requirements.txt` cannot pull it in
+# by accident.
+#
+# It adds: chrislib, altered_midas, timm, kornia, scikit-image, gdown
+# (~15 packages) and downloads ~1 GB of weights on first use. It does NOT
+# change your torch install.

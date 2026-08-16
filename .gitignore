@@ -1,0 +1,26 @@
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+
+# Generated on first use by tools/make_sample.py; regenerate with
+#   python tools/make_sample.py
+assets/sample_scene.png
+
+# Model checkpoints, downloaded on first run.
+models/
+*.pt
+
+# Local test photographs. These are inputs, not project assets, and the
+# repository generates its own reproducible test scene via
+# tools/make_sample.py. Keeping personal images out of a public history
+# also avoids publishing them permanently.
+chair.png
+dice.jpg
+
+# Exports land next to the source image by default, but catch the obvious
+# cases if someone writes them into the project.
+*_relit.png
+*_gbuffer.zip
+*_lighting.json
